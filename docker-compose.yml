@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: arcade_client
+    restart: unless-stopped
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: arcade_server
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - CLIENT_URL=https://yourdomain.com
+    ports:
+      - "4000:4000"
+  nginx:
+    image: nginx:alpine
+    container_name: arcade_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - client
+      - server
